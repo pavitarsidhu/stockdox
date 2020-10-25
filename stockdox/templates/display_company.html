@@ -13,6 +13,15 @@
     var annual_docs_display_count = 0;
     var annual_docs_count = "{{annual_docs_count}}"
 
+    /*
+      NOTE : The 'loadMoreXDocs' functions seen below will be replaced with a React equivalent.
+
+      This JavaScript function was used accross all the various categories of company PDFs. 
+      But it is NOT efficient as it duplicates the same logic for all the categories, and
+      it is planned to be replaced with a React component in the future.
+
+    */
+
     function loadMoreAnnualDocs(event) {
       event.preventDefault();
       var num_added = 0;
