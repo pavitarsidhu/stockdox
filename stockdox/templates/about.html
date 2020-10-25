@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  <title>About Us - StockDox</title>
+{% endblock %}
+
+{% block css_files %}
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block page_content %}
+
+	<div class="container generic-header-container">
+		<div class="row">
+			<div class="col">
+			<h1>About StockDox</h1>
+		</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col">
+
+			<p>StockDox provides viewing access to all the important filings that pertain to Canadian public companies. We have filings for companies that are listed on the TSX (Toronto Stock Exchange) and the TSXV (TSX-Venture Exchange).</p>
+
+			<h2>Goal</h2>
+			<p>StockDox aims to simplify the hassle behind trying to gather the various relevant documents that you may need for any respective Canadian company. Utlimately, this will allow you to focus on more core tasks and save time. This will be useful for both retail and institutional investors alike.</p>
+			
+			<h2>Disclaimer</h2>
+			<p>StockDox and its affiliates do not endorse or recommend any securities issued by any companies identified on, or linked through, this site. Please seek professional advice to evaluate specific securities or other content on this site. All content (including any links to third party sites) is provided for informational purposes only (and not for trading purposes), and is not intended to provide legal, accounting, tax, investment, financial or other advice and should not be relied upon for such advice. The views, opinions and advice of any third party reflect those of the individual authors and are not endorsed by StockDox or its affiliates. StockDox and its affiliates have not prepared, reviewed or updated the content of third parties on this site or the content of any third party sites, and assume no responsibility for such information.</p>
+
+			</div>
+		</div>
+	</div>
+	
+{% endblock %}

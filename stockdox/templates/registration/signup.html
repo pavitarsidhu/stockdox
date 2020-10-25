@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Register - StockDox</title>
+{% endblock %}
+
+{% block css_files %}
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block page_content %}
+
+	<div class="container generic-header-container">
+		<div class="row">
+			<div class="col"><h3>Register</h3></div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col">
+				<form method="post">
+				  {% csrf_token %}
+				  {% for field in form %}
+				    <p>
+				      {{ field.label_tag }}<br>
+				      {{ field }}
+				      {% if field.help_text %}
+				        <small style="color: grey">{{ field.help_text }}</small>
+				      {% endif %}
+				      {% for error in field.errors %}
+				        <p style="color: red">{{ error }}</p>
+				      {% endfor %}
+				    </p>
+				  {% endfor %}
+				  <p>By clicking "Sign up" you agree to StockDox's <a href="/terms-and-conditions/">Terms and Conditions</a>, and <a href="/privacy-policy/">Privacy Policy.</a></p>
+				  <button type="submit" class="btn btn-primary">Sign up</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+{% endblock %}

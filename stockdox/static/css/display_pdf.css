@@ -1,0 +1,15 @@
+#companyPdfIframe {
+  position: fixed;
+  right: 0px;
+  width: 100%;
+  border: none;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+#company-back-icon-container {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+}

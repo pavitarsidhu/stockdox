@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  <title>Purchase 1 Year Plan - StockDox</title>
+{% endblock %}
+
+{% block css_files %}
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block page_content %}
+
+{% if user.has_paid %}
+<div class="container checkout-header-container">
+	<div class="row">
+		<div class="col">
+			<h3>Already Subscribed</h3>
+			<p>You have already subscribed to StockDox's service!</p>
+		</div>
+	</div>
+{% else %}
+
+<div class="container checkout-header-container">
+	<div class="row">
+		<div class="col"><h3>Purchase 1 Year Premium Plan</h3></div>
+	</div>
+
+	<div class="row">
+		<div class="col"><p>The subscription plan is sold on an annual basis. You can choose between the premium package or the enterprise one if you need multiple accounts.</p></div>
+	</div>
+	
+		<div class="row promo-card-row">
+		<div class="col-md-6">
+		<div class="card text-white bg-secondary mb-3">
+		  <div class="card-header">Premium</div>
+		  <div class="card-body" id="promotion-card-body">
+		    <h5 class="card-title">$20 per month billed annually.</h5>
+		    <ul>
+		      <li>Access to All Historical Filings</li>
+		      <li>Intuitively Organized Filings</li>
+		      <li>Download Any Filing and Link to It</li>
+		      <li>And more</li>
+		    </ul>
+		  </div>
+		</div>
+		</div>
+		<div class="col-md-6">
+		<div class="card text-white bg-secondary mb-3">
+		  <div class="card-header">Enterprise</div>
+		  <div class="card-body promotion-card-body" id="promotion-card-body">
+		    <h5 class="card-title">Volume discounts for multiple users.</h5>
+		    <p class="card-text">If you're a group / enterprise that is interested in a group license, please email for group discounts. A minimum of 5 users is required.</p>
+		    <h5><a href="mailto:stockdox@outlook.com">Contact Us For Enterprise Solutions</a></h5>
+		  </div>
+	  </div>
+		</div>
+	</div>
+
+	<div class="row total-due-row">
+		<div class="col">
+			<h5 id="total-due-amount">Annual Subscription Cost: $240</h5>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col">
+			<form action="" method="post" id="payment-form">{% csrf_token %}
+			  <div class="form-row">
+			    <label for="card-element">
+			      Credit or debit card
+			    </label>
+			    <div id="card-element">
+			      <!-- A Stripe Element will be inserted here. -->
+			    </div>
+
+			    <!-- Used to display form errors. -->
+			    <div id="card-errors" role="alert"></div>
+			  </div>
+
+			  <button class="btn btn-success" id="checkout-button">Submit Payment</button>
+			</form>
+		</div>
+	</div>
+	<div class="row">
+		<div clas="col">
+			<p class="text-danger"><b>{{error}}</b></p>
+		</div>
+	</div>
+</div>
+
+{% endif %}
+	
+{% endblock %}
+
+{% block bottom_js_files %}
+	<script type="text/javascript">
+		// Create a Stripe client.
+		var stripe = Stripe('{{publishKey}}');
+
+		// Create an instance of Elements.
+		var elements = stripe.elements();
+
+		// Custom styling can be passed to options when creating an Element.
+		// (Note that this demo uses a wider set of styles than the guide below.)
+		var style = {
+		  base: {
+		    color: '#32325d',
+		    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+		    fontSmoothing: 'antialiased',
+		    fontSize: '16px',
+		    '::placeholder': {
+		      color: '#aab7c4'
+		    }
+		  },
+		  invalid: {
+		    color: '#fa755a',
+		    iconColor: '#fa755a'
+		  }
+		};
+
+		// Create an instance of the card Element.
+		var card = elements.create('card', {style: style});
+
+		// Add an instance of the card Element into the `card-element` <div>.
+		card.mount('#card-element');
+
+		// Handle real-time validation errors from the card Element.
+		card.addEventListener('change', function(event) {
+		  var displayError = document.getElementById('card-errors');
+		  if (event.error) {
+		    displayError.textContent = event.error.message;
+		  } else {
+		    displayError.textContent = '';
+		  }
+		});
+
+
+		// Create a token or display an error when the form is submitted.
+		var form = document.getElementById('payment-form');
+		form.addEventListener('submit', function(event) {
+			var checkout_button = document.getElementById("checkout-button");
+			checkout_button.disabled = true;
+		  event.preventDefault();
+
+		  stripe.createToken(card).then(function(result) {
+		    if (result.error) {
+		      // Inform the customer that there was an error.
+		      var errorElement = document.getElementById('card-errors');
+		      errorElement.textContent = result.error.message;
+		      checkout_button.disabled = false;
+		    } else {
+		      // Send the token to your server.
+		      stripeTokenHandler(result.token);
+		    }
+		  });
+		});
+
+		function stripeTokenHandler(token) {
+		  // Insert the token ID into the form so it gets submitted to the server
+		  var form = document.getElementById('payment-form');
+		  var hiddenInput = document.createElement('input');
+		  hiddenInput.setAttribute('type', 'hidden');
+		  hiddenInput.setAttribute('name', 'stripeToken');
+		  hiddenInput.setAttribute('value', token.id);
+		  form.appendChild(hiddenInput);
+
+		  // Submit the form
+		  form.submit();
+		}
+
+	</script>
+{% endblock %}

@@ -1,0 +1,821 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block css_files %}
+
+{% block header_tags %}
+  <meta name="description" content="Company filings for {{company_name | title }}, including financials, news, proxies, prospectuses, and others.">
+{% endblock %}
+
+{% block header_js_files %}
+  <script src="{% static 'js/remove-english-label.js' %}"></script>
+  <script type="text/javascript">
+    var annual_docs_display_count = 0;
+    var annual_docs_count = "{{annual_docs_count}}"
+
+    function loadMoreAnnualDocs(event) {
+      event.preventDefault();
+      var num_added = 0;
+      {% for doc in annual_docs %}
+        var loop_count = "{{forloop.counter}}";
+        if (loop_count <= annual_docs_display_count) {
+          // do nothing
+        } else {
+          if (num_added != 15) {
+            let name = filename_without_english("{{doc.filename}}");
+            let class_name = ".{{doc.id}}";
+            let newRowContent = '<tr><td><a href ="/view/{{ doc.id }}/"><span class="{{doc.id}}">'+name+'</span></a></td><td class="text-right">{{doc.dateoffilling}}</td></tr>';
+
+            $("#financial-doc-table tbody").append(newRowContent);
+            num_added++;
+            annual_docs_display_count++;
+          }
+        }
+      {% endfor %}
+      if (annual_docs_display_count >= annual_docs_count) {
+        $("#load-more-annual-docs-id").hide();
+      }
+    }
+
+    var prospectus_docs_display_count = 0;
+    var prospectus_docs_count = "{{prospectus_docs_count}}"
+
+    function loadMoreProspectusDocs(event) {
+      event.preventDefault();
+      var num_added = 0;
+      {% for doc in prospectus_docs %}
+        var loop_count = "{{forloop.counter}}";
+        if (loop_count <= prospectus_docs_display_count) {
+          // do nothing
+        } else {
+          if (num_added != 15) {
+            let name = filename_without_english("{{doc.filename}}");
+            let class_name = ".{{doc.id}}";
+            let newRowContent = '<tr><td><a href ="/view/{{ doc.id }}/"><span class="{{doc.id}}">'+name+'</span></a></td><td class="text-right">{{doc.dateoffilling}}</td></tr>';
+
+            $("#prospectus-doc-table tbody").append(newRowContent);
+            num_added++;
+            prospectus_docs_display_count++;
+          }
+        }
+      {% endfor %}
+      if (prospectus_docs_display_count >= prospectus_docs_count) {
+        $("#load-more-prospectus-docs-id").hide();
+      }
+    }
+
+    var news_docs_display_count = 0;
+    var news_docs_count = "{{news_docs_count}}";
+
+    function loadMoreNewsDocs(event) {
+      event.preventDefault();
+      var num_added = 0;
+      {% for doc in news_docs %}
+        var loop_count = "{{forloop.counter}}";
+        if (loop_count <= news_docs_display_count) {
+          // do nothing
+        } else {
+          if (num_added != 15) {
+            let name = filename_without_english("{{doc.filename}}");
+            let class_name = ".{{doc.id}}";
+            let newRowContent = '<tr><td><a href ="/view/{{ doc.id }}/"><span class="{{doc.id}}">'+name+'</span></a></td><td class="text-right">{{doc.dateoffilling}}</td></tr>';
+
+            $("#news-doc-table tbody").append(newRowContent);
+            num_added++;
+            news_docs_display_count++;
+          }
+        }
+      {% endfor %}
+      if (news_docs_display_count >= news_docs_count) {
+        $("#load-more-news-docs-id").hide();
+      }
+    }
+  </script>
+{% endblock %}
+
+{% block title %}
+  <title>{{company_name | title }} - Filings - StockDox</title>
+{% endblock %}
+
+<link href="{% static 'css/display_company.css' %}" rel="stylesheet">
+{% endblock %}
+{% block nav_search_bar %}
+
+ <div class="input-group container-fluid" id="scrollable-search-menu">
+   <input type="text" class="form-control typeahead display-company-search" name="query" id="query" placeholder="Ticker or Company Name" data-provide="typeahead" autocomplete="off">
+   <button id="company-search-button" class="btn btn-primary" type="submit" onclick="search_company(event)">Search</button>
+ </div>
+
+    <script type="text/javascript">
+      $(".typeahead").typeahead({
+        source: [
+          {% for company in unique_companies %}
+            { 
+              id: "{{company.companyname }}",
+              name: "{{ company.ticker }} : {{ company.companyname | safe | title }}"
+            },
+          {% endfor %}
+        ],
+        items: 10,
+
+        // min length to trigger the suggestion list
+        minLength: 1,
+
+        // number of pixels the scrollable parent container scrolled down
+        scrollHeight: 10,
+
+        // auto selects the first item
+        autoSelect: false,
+
+        // callbacks
+        afterSelect: function (data) {
+          document.getElementById("company-search-button").disabled = true;
+          window.location.href="/search/"+data.name;
+        },
+
+        afterEmptySelect: $.noop,
+
+        // adds an item to the end of the list
+        addItem: false,
+
+        // delay between lookups
+        delay: 0,
+
+        // default template
+        // menu: '<ul class="typeahead dropdown-menu" role="listbox"></ul>',
+        // item: '<li><a class="dropdown-item" href="#" role="option"></a></li>',
+        // headerHtml: '<li class="dropdown-header"></li>',
+        // headerDivider: '<li class="divider" role="separator"></li>',
+        // itemContentSelector:'a',
+      });
+    </script>
+
+{% endblock %}
+
+{% block page_content %}
+<div class="sb-page-header pb-10 sb-page-header-dark bg-gradient-primary-to-secondary">
+  <div class="container-fluid">
+    <div class="sb-page-header-content py-5">
+      <h1 class="sb-page-header-title">
+        <div class="sb-page-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <span>{{ company_name | title }}</span>
+      </h1>
+      <div class="sb-page-header-subtitle text-uppercase">{{ticker}}</div>
+      <div class="sb-page-header-subtitle">Share Price: {{stock_price}}</div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid mt-n10">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Annual Reports</div>
+        <div class="card-body">
+          <table class="table doc-table" id="financial-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in annual_docs %}
+              {% if  forloop.counter <= 10 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                          annual_docs_display_count++;
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+              {% else %} 
+              {% for doc in annual_docs %}
+              {% if  forloop.counter <= 2 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+
+            </tbody>
+          </table>
+          {% if user.is_authenticated %}
+          <button id="load-more-annual-docs-id" onclick="loadMoreAnnualDocs(event)" class="btn btn-light">View More</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Annual Financial Statements</div>
+        <div class="card-body">
+          <table class="table doc-table financial-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in audited_annual_docs %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">Annual financial statement</span>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in audited_annual_docs %}
+              {% if  forloop.counter <= 2 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                      <span class="{{doc.id}}">Annual financial statement</span>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Quarterly Reports</div>
+        <div class="card-body">
+          <table class="table doc-table financial-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in quarterly_docs %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">Interim financial report</span>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in quarterly_docs %}
+              {% if  forloop.counter <= 2 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                      <span class="{{doc.id}}">Interim financial report</span>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Management's Discussion & Analysis</div>
+        <div class="card-body">
+          <table class="table doc-table financial-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in management_docs %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in management_docs %}
+              {% if  forloop.counter <= 2 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Annual Information Form</div>
+        <div class="card-body">
+          <table class="table doc-table financial-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in annual_info_form_docs %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in annual_info_form_docs %}
+              {% if  forloop.counter <= 2 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Proxy Circular</div>
+        <div class="card-body">
+          <table class="table doc-table financial-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in proxy_docs %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">Management information circular</span>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in proxy_docs %}
+              {% if  forloop.counter <= 2 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">Management information circular</span>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">News Releases</div>
+        <div class="card-body">
+          <table class="table doc-table" id="news-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in news_docs %}
+              {% if  forloop.counter <= 10 %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                          news_docs_display_count++;
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in news_docs %}
+              {% if  forloop.counter <= 2 %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+          {% if user.is_authenticated %}
+          <button id="load-more-news-docs-id" onclick="loadMoreNewsDocs(event)" class="btn btn-light">View More</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Prospectus</div>
+        <div class="card-body">
+          <table class="table doc-table" id="prospectus-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in prospectus_docs %}
+                {% if  forloop.counter <= 10 %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                          prospectus_docs_display_count++;
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in prospectus_docs %}
+              {% if  forloop.counter <= 2 %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+          {% if user.is_authenticated %}
+          <button id="load-more-prospectus-docs-id" onclick="loadMoreProspectusDocs(event)" class="btn btn-light">View More</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+    <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">Other</div>
+        <div class="card-body">
+          <table class="table doc-table financial-doc-table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="text-left">Name</th>
+                <th scope="col" class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% if user.is_authenticated %}
+              {% for doc in other_docs %}
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+              {% endfor %}
+
+              {% else %} 
+              {% for doc in other_docs %}
+              {% if  forloop.counter <= 2 %} 
+              <tr>
+                <td>
+                    <a href ="/view/{{ doc.id }}/">
+                        <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                        <script type="text/javascript">
+                        {
+                            let updated_name = filename_without_english("{{doc.filename}}");
+                            let class_name = ".{{doc.id}}";
+                            $(class_name).text(updated_name);    
+                        }
+                        </script>
+                    </a>
+                </td>
+                <td class="text-right">{{doc.dateoffilling}}</td>
+              </tr>
+
+              {% endif %}
+              {% endfor %}
+              <tr>
+                <td>
+                  <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% if num_tech_reports >= 1 %}
+      <div class="col-md-6">
+        <div class="card mb-4">
+          <div class="card-header">Technical Reports</div>
+          <div class="card-body">
+            <table class="table doc-table financial-doc-table">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col" class="text-left">Name</th>
+                  <th scope="col" class="text-right">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% if user.is_authenticated %}
+                {% for doc in tech_report_docs %}
+                <tr>
+                  <td>
+                      <a href ="/view/{{ doc.id }}/">
+                          <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                          <script type="text/javascript">
+                          {
+                              let updated_name = filename_without_english("{{doc.filename}}");
+                              let class_name = ".{{doc.id}}";
+                              $(class_name).text(updated_name);    
+                          }
+                          </script>
+                      </a>
+                  </td>
+                  <td class="text-right">{{doc.dateoffilling}}</td>
+                </tr>
+                {% endfor %}
+
+                {% else %} 
+                {% for doc in tech_report_docs %}
+                {% if  forloop.counter <= 2 %} 
+                <tr>
+                  <td>
+                      <a href ="/view/{{ doc.id }}/">
+                          <span class="{{doc.id}}">{{ doc.filename | title }}</span>
+                          <script type="text/javascript">
+                          {
+                              let updated_name = filename_without_english("{{doc.filename}}");
+                              let class_name = ".{{doc.id}}";
+                              $(class_name).text(updated_name);    
+                          }
+                          </script>
+                      </a>
+                  </td>
+                  <td class="text-right">{{doc.dateoffilling}}</td>
+                </tr>
+
+                {% endif %}
+                {% endfor %}
+                <tr>
+                  <td>
+                    <p><a href="{% url 'login' %}?next={{request.path}}">Log In</a> to view all.</p>
+                  </td>
+                </tr>
+                {% endif %}
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+  <div class="row text-center">
+    <div class="col">
+      <p><a href="mailto:stockdox@outlook.com">See an issue? Please let us know.</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block bottom_js_files %}
+{% if user.is_authenticated %}
+  <script type="text/javascript">
+    $(document).ready(function() {
+      if (annual_docs_display_count >= annual_docs_count) {
+        $("#load-more-annual-docs-id").hide();
+      }
+      if (prospectus_docs_display_count >= prospectus_docs_count) {
+        $("#load-more-prospectus-docs-id").hide();
+      }
+      if (news_docs_display_count >= news_docs_count) {
+        $("#load-more-news-docs-id").hide();
+      }
+    });
+  </script>
+  {% endif %}
+{% endblock %}
+

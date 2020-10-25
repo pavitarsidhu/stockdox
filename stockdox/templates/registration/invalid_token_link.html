@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block header_tags %}
+	<meta name=”robots” content=”noindex”>
+{% endblock %}
+
+{% block title %}
+  <title>Registration Complete - StockDox</title>
+{% endblock %}
+
+{% block page_content %}
+<div class="container generic-header-container">
+	<div class="row">
+		<div class="col">
+		<h1 class="text-danger">Invalid</h1>
+		<p>This activation link is invalid! This is either because the account has already been confirmed or the link has expired. If you think something is wrong, please <a href="mailto:stockdox@outlook.com">contact us.</a></p>
+		<p><a href="/">Return Home</a></p>
+	</div>
+	</div>
+</div>
+{% endblock %}

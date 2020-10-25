@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block header_tags %}
+	<meta name=”robots” content=”noindex”>
+{% endblock %}
+
+{% block title %}
+  <title>Payment Confirmed - StockDox</title>
+{% endblock %}
+
+{% block css_files %}
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block page_content %}
+
+	{% if user.has_paid %}
+
+	<div class="container generic-header-container">
+		<div class="row">
+			<div class="col">
+			<h1 class="text-success">Payment Confirmed</h1>
+			<p>You have succesfully subscribed to StockDox's service! You will now now be able to view and access full filing information for all Canadian public companies.</p>
+			<p>We would like to thank you for choosing StockDox as your main provider for all Canadian public company filings. We take our customer service very seriously, so if you have any questions, concerns or comments, please do not hesitate to <a href="mailto:stockdox@outlook.com">contact us.</a> Happy investing!</p>	
+			<p><a href="/">Click here to return home and begin searching for company filings.</a></p>
+		</div>
+		</div>
+	</div>
+
+	{% endif %}
+	
+{% endblock %}

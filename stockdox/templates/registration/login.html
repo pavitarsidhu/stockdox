@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  <title>Login - StockDox</title>
+{% endblock %}
+
+{% block css_files %}
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block page_content %}
+
+	<div class="container generic-header-container">
+		<div class="row">
+			<div class="col"><h3>Log In</h3></div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col">
+				<form method="POST">
+					<!-- This hidden input addresses the following for redirecting after logging in : 
+						If the user comes from a login_required view: next is set by login_required
+						If the user comes from the login form (ie. authentication did not pass): next=the previously set next value
+						If the user comes from a non login_required view: next=the referer url
+						If the user directly opened the login page: next=/
+
+					<input type="hidden" value="{% if request.REQUEST.next %}{{ request.REQUEST.next }}{% else %}{% if request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}/{% endif %}{% endif %}" name="next" />
+					-->
+
+					{% csrf_token %}
+					{{ form.as_p }}
+					<p><a href="/accounts/password_reset/">Forgot your password?</a></p>
+					<button type="submit" class="btn btn-primary">Sign in</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="container register-container">
+		<div class="row">
+			<div class="col"><p>Don't have an account? <a href="/accounts/signup">Register now.</a></p></div>
+		</div>
+	</div>
+	
+{% endblock %}

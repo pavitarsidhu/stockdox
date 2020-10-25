@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  <title>Profile - StockDox</title>
+{% endblock %}
+
+{% block css_files %}
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block page_content %}
+<div class="container generic-header-container">
+    <div class="row">
+
+        <div class="card" style="width: 100%;">
+            <div class="card-header">
+                {{user.username}}
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><span class="font-weight-bold">Name: </span>{{user.get_full_name}}</li>
+                <li class="list-group-item"><span class="font-weight-bold">Subscription Status:</span> 
+                	{% if user.has_paid %}
+                    <span class="text-success">Valid</span>
+                   {% else %}
+                     <span class="text-danger">Expired</span>
+                   {% endif %}
+                </li>
+                {% if user.has_paid %}
+                <li class="list-group-item"><span class="font-weight-bold">Expires:</span> {{expiration_date}}</li>
+                {% else %}
+                <li class="list-group-item"><a href="/checkout" class="card-link font-weight-bold">Purchase Plan</a></li>
+                {% endif %}
+                <li class="list-group-item"><a href="/accounts/password_change/" class="card-link font-weight-bold">Change Password</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

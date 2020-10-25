@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block css_files %}
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/display_company.css' %}">
+  <link rel="stylesheet" href="{% static 'css/display_pdf.css' %}">
+{% endblock %}
+
+{% block header_tags %}
+  <meta name="description" content="{{doc.companyname | title }} {{doc.filename | title }} filing for {{doc.dateoffilling}}.">
+{% endblock %}
+
+{% block title %}
+  <title>{{doc.companyname | title }} - {{doc.filename}} - StockDox</title>
+{% endblock %}
+
+{% block nav_search_bar %}
+
+ <div class="input-group container-fluid" id="scrollable-search-menu">
+   <input type="text" class="form-control typeahead display-company-search" name="query" id="query" placeholder="Ticker or Company Name" data-provide="typeahead" autocomplete="off">
+   <button id="company-search-button" class="btn btn-primary" type="submit" onclick="search_company(event)">Search</button>
+ </div>
+
+<script type="text/javascript">
+  $(".typeahead").typeahead({
+    source: [
+      {% for company in unique_companies %}
+        { 
+          id: "{{company.companyname }}",
+          name: "{{ company.ticker }} : {{ company.companyname | safe | title }}"
+        },
+      {% endfor %}
+    ],
+    items: 10,
+
+    // min length to trigger the suggestion list
+    minLength: 1,
+
+    // number of pixels the scrollable parent container scrolled down
+    scrollHeight: 10,
+
+    // auto selects the first item
+    autoSelect: false,
+
+    // callbacks
+    afterSelect: function (data) {
+      document.getElementById("company-search-button").disabled = true;
+      window.location.href="/search/"+data.name;
+    },
+
+    afterEmptySelect: $.noop,
+
+    // adds an item to the end of the list
+    addItem: false,
+
+    // delay between lookups
+    delay: 0,
+
+    // default template
+    // menu: '<ul class="typeahead dropdown-menu" role="listbox"></ul>',
+    // item: '<li><a class="dropdown-item" href="#" role="option"></a></li>',
+    // headerHtml: '<li class="dropdown-header"></li>',
+    // headerDivider: '<li class="divider" role="separator"></li>',
+    // itemContentSelector:'a',
+  });
+</script>
+
+{% endblock %}
+
+{% block page_content %}
+
+<!-- 	<div class="container-fluid">
+		<div class="row">
+			<div class="col">
+				<div class="embed-responsive embed-responsive-1by1">
+					<iframe id="myiframe" class="embed-responsive-item" src="{{doc.url}}" type="application/pdf" allowfullscreen></iframe>
+			</div>
+		</div>
+	</div>
+  </div> -->
+
+  <div id="company-back-icon-container">
+    <a href="/search/{{doc.companyname}}">
+      <img src="{% static 'images/back.png' %}" id="company-results-back-icon"/>
+      {{doc.companyname | title}}
+    </a>
+    <br />
+
+    
+<!--     <a href="{{doc.url}}" download target="_blank">Download</a> <i>(Right click and Save link as)</i> -->
+        <div id="356103620">
+            <script type="text/javascript">
+                try {
+                    window._mNHandle.queue.push(function (){
+                        window._mNDetails.loadTag("356103620", "728x90", "356103620");
+                    });
+                }
+                catch (error) {}
+            </script>
+        </div>
+  </div>
+  <div class="container" id="pdf-container">
+    
+  </div>
+
+  <script type="text/javascript">
+    var pdfurl = "{{doc.url}}";
+    $( document ).ready(function() {
+      var iframeElement = '<iframe id="companyPdfIframe" src=\"'+pdfurl+'\"></iframe>';
+      $( "#pdf-container" ).append(iframeElement);
+    });
+  </script>
+	
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
